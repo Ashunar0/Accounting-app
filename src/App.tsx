@@ -3,10 +3,14 @@ import Home from "./sections/Home";
 import Report from "./sections/Report";
 import NoMatch from "./sections/NoMatch";
 import AppLayout from "./components/layout/AppLayout";
+import { theme } from "./theme/theme";
+import { ThemeProvider } from "@emotion/react";
+import { CssBaseline } from "@mui/material";
 
 const App = () => {
   return (
-    <div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Router>
         <Routes>
           <Route path="/" element={<AppLayout />}>
@@ -16,7 +20,7 @@ const App = () => {
           </Route>
         </Routes>
       </Router>
-    </div>
+    </ThemeProvider>
   );
 };
 
