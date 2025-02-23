@@ -2,8 +2,18 @@ import { Card, CardContent, Grid2, Stack, Typography } from "@mui/material";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import { Transaction } from "../types";
+import { financeCalculations } from "../utils/financeCalculations";
 
-const MonthlySummary = () => {
+interface MonthlySummaryprops {
+  monthlyTransactions: Transaction[];
+}
+
+const MonthlySummary = ({ monthlyTransactions }: MonthlySummaryprops) => {
+  console.log(monthlyTransactions);
+
+  const { income, outgo, balance } = financeCalculations(monthlyTransactions);
+
   return (
     <Grid2 container spacing={{ xs: 1, sm: 2 }} mb={2}>
       {/* income */}
@@ -30,7 +40,7 @@ const MonthlySummary = () => {
                 fontSize: { sx: ".8rem", sm: "1rem", md: "1.2rem" },
               }}
             >
-              ¥100,000
+              ¥{income}
             </Typography>
           </CardContent>
         </Card>
@@ -60,7 +70,7 @@ const MonthlySummary = () => {
                 fontSize: { sx: ".8rem", sm: "1rem", md: "1.2rem" },
               }}
             >
-              ¥100,000
+              ¥{outgo}
             </Typography>
           </CardContent>
         </Card>
@@ -90,7 +100,7 @@ const MonthlySummary = () => {
                 fontSize: { sx: ".8rem", sm: "1rem", md: "1.2rem" },
               }}
             >
-              ¥100,000
+              ¥{balance}
             </Typography>
           </CardContent>
         </Card>
