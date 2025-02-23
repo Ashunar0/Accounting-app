@@ -10,14 +10,11 @@ import { useEffect, useState } from "react";
 import { Transaction } from "./types/index";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "./firebase";
-import { format } from "date-fns";
-//import { formatMonth } from "./utils/formating";
+import { formatMonth } from "./utils/formating";
 
 const App = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [currentMonth, setCurrentMonth] = useState<string>(
-    format(new Date(), "yyyy-MM")
-  );
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   //console.log(currentMonth);
   //const formatedDate = format(currentMonth, "yyyy-MM"); //date-fnsで日付をフォーマット
   //console.log(formatedDate);
@@ -29,6 +26,7 @@ const App = () => {
     return typeof err === "object" && err !== null && "code" in err; //エラーはオブジェクトであり、nullでなく、codeプロパティを持っている
   };
 
+  //初回レンダリング時に、firebaseからすべてのデータを取得
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -63,7 +61,7 @@ const App = () => {
 
   //今月のデータにのみを絞り込む
   const monthlyTransactions = transactions.filter((transaction) => {
-    return transaction.date.startsWith(currentMonth);
+    return transaction.date.startsWith(formatMonth(currentMonth));
   });
   //console.log(monthlyTransactions);
 
@@ -75,7 +73,12 @@ const App = () => {
           <Route path="/" element={<AppLayout />}>
             <Route
               index
-              element={<Home monthlyTransactions={monthlyTransactions} />}
+              element={
+                <Home
+                  monthlyTransactions={monthlyTransactions}
+                  setCurrentMonth={setCurrentMonth}
+                />
+              }
             />
             <Route path="/report" element={<Report />} />
             <Route path="/*" element={<NoMatch />} />

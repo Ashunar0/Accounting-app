@@ -1,8 +1,8 @@
 import { format } from "date-fns/fp";
 
 //日付をフォーマットする関数
-export const formatMonth = (date: string): string => {
-  return format(date, "yyyy-MM");
+export const formatMonth = (date: Date): string => {
+  return format("yyyy-MM", date);
 };
 
 //金額をフォーマットする関数
