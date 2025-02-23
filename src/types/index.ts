@@ -17,3 +17,10 @@ export interface Balance {
   outgo: number;
   balance: number;
 }
+
+export interface CalenderContent {
+  start: string;
+  income: string;
+  outgo: string;
+  balance: string;
+}

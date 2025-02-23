@@ -44,7 +44,7 @@ const App = () => {
           } as Transaction; //型アサーション
         });
 
-        console.log(transactionsData);
+        //console.log(transactionsData);
         setTransactions(transactionsData);
       } catch (err) {
         //error handling
@@ -65,7 +65,7 @@ const App = () => {
   const monthlyTransactions = transactions.filter((transaction) => {
     return transaction.date.startsWith(currentMonth);
   });
-  console.log(monthlyTransactions);
+  //console.log(monthlyTransactions);
 
   return (
     <ThemeProvider theme={theme}>
