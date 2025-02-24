@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -11,12 +12,29 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close"; // 閉じるボタン用のアイコン
 import FastfoodIcon from "@mui/icons-material/Fastfood"; //食事アイコン
+import AlarmIcon from "@mui/icons-material/Alarm"; //アラームアイコン
+import TrainIcon from "@mui/icons-material/Train"; //電車アイコン
+import AddHomeIcon from "@mui/icons-material/AddHome"; //家アイコン
+import Diversity3Icon from "@mui/icons-material/Diversity3"; //多様性アイコン
+import SportsTennisIcon from "@mui/icons-material/SportsTennis"; //テニスアイコン
+import WorkIcon from "@mui/icons-material/Work"; //仕事アイコン
+import AddBusinessIcon from "@mui/icons-material/AddBusiness"; //ビジネスアイコン
+import SavingsIcon from "@mui/icons-material/Savings"; //貯金アイコン
 import { Controller, useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { IncomeCategory, OutgoCategory } from "../types";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
+}
+
+type ValueType = "income" | "outgo";
+
+interface CategoryItem {
+  label: IncomeCategory | OutgoCategory;
+  icon: React.JSX.Element;
 }
 
 const TransactionForm = ({
@@ -26,7 +44,24 @@ const TransactionForm = ({
 }: TransactionFormProps) => {
   const formWidth = 320;
 
-  const { control } = useForm({
+  const outgoCategories: CategoryItem[] = [
+    { label: "食費", icon: <FastfoodIcon fontSize="small" /> },
+    { label: "日用品", icon: <AlarmIcon fontSize="small" /> },
+    { label: "交通費", icon: <TrainIcon fontSize="small" /> },
+    { label: "居住費", icon: <AddHomeIcon fontSize="small" /> },
+    { label: "交際費", icon: <Diversity3Icon fontSize="small" /> },
+    { label: "趣味", icon: <SportsTennisIcon fontSize="small" /> },
+  ];
+
+  const incomeCategories: CategoryItem[] = [
+    { label: "給与", icon: <WorkIcon fontSize="small" /> },
+    { label: "副収入", icon: <AddBusinessIcon fontSize="small" /> },
+    { label: "お小遣い", icon: <SavingsIcon fontSize="small" /> },
+  ];
+
+  const [categories, setCategories] = useState(outgoCategories);
+
+  const { control, setValue, watch } = useForm({
     defaultValues: {
       type: "outgo",
       date: currentDay,
@@ -35,6 +70,26 @@ const TransactionForm = ({
       content: "",
     },
   });
+
+  //収入・支出の切り替え
+  const toggleValue = (type: ValueType) => {
+    setValue("type", type);
+  };
+
+  //現在のフォームのタイプを監視
+  const currentType = watch("type");
+  //console.log(currentType);
+
+  //収支のカテゴリを切り替え
+  useEffect(() => {
+    const newCategories =
+      currentType === "income" ? incomeCategories : outgoCategories;
+    setCategories(newCategories);
+  }, [currentType]);
+
+  useEffect(() => {
+    setValue("date", currentDay);
+  }, [currentDay]);
 
   return (
     <Box
@@ -79,10 +134,24 @@ const TransactionForm = ({
             control={control}
             render={({ field }) => (
               <ButtonGroup fullWidth>
-                <Button variant={"contained"} color="error">
+                <Button
+                  variant={field.value === "outgo" ? "contained" : "outlined"}
+                  color="error"
+                  onClick={() => {
+                    toggleValue("outgo");
+                  }}
+                >
                   支出
                 </Button>
-                <Button>収入</Button>
+                <Button
+                  variant={field.value === "income" ? "contained" : "outlined"}
+                  color="primary"
+                  onClick={() => {
+                    toggleValue("income");
+                  }}
+                >
+                  収入
+                </Button>
               </ButtonGroup>
             )}
           />
@@ -109,12 +178,12 @@ const TransactionForm = ({
             control={control}
             render={({ field }) => (
               <TextField {...field} id="カテゴリ" label="カテゴリ" select>
-                <MenuItem value={"食費"}>
-                  <ListItemIcon>
-                    <FastfoodIcon />
-                  </ListItemIcon>
-                  食費
-                </MenuItem>
+                {categories.map((category) => (
+                  <MenuItem value={category.label} key={category.label}>
+                    <ListItemIcon>{category.icon}</ListItemIcon>
+                    {category.label}
+                  </MenuItem>
+                ))}
               </TextField>
             )}
           />
@@ -124,7 +193,16 @@ const TransactionForm = ({
             name="amount"
             control={control}
             render={({ field }) => (
-              <TextField {...field} label="金額" type="number" />
+              <TextField
+                {...field}
+                value={field.value === 0 ? "" : field.value}
+                onChange={(e) => {
+                  const newValue = parseInt(e.target.value, 10) || 0;
+                  field.onChange(newValue);
+                }}
+                label="金額"
+                type="number"
+              />
             )}
           />
 
@@ -138,7 +216,12 @@ const TransactionForm = ({
           />
 
           {/* 保存ボタン */}
-          <Button type="submit" variant="contained" color={"primary"} fullWidth>
+          <Button
+            type="submit"
+            variant="contained"
+            color={currentType === "income" ? "primary" : "error"}
+            fullWidth
+          >
             保存
           </Button>
         </Stack>
