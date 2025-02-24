@@ -14,7 +14,6 @@ import {
 //アイコン
 import NotesIcon from "@mui/icons-material/Notes";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import FastfoodIcon from "@mui/icons-material/Fastfood";
 import DailySummary from "./DailySummary";
 import { Transaction } from "../types";
 import { formatCurrency } from "../utils/formating";
@@ -23,11 +22,13 @@ import IconComponents from "./common/IconComponents";
 interface TransactionProps {
   dailyTrabsactions: Transaction[];
   currentDay: string;
+  handleAddTransactionForm: () => void;
 }
 
 const TransactionMenu = ({
   dailyTrabsactions,
   currentDay,
+  handleAddTransactionForm,
 }: TransactionProps) => {
   const menuDrawerWidth = 320;
   return (
@@ -67,7 +68,11 @@ const TransactionMenu = ({
             <Typography variant="body1">内訳</Typography>
           </Box>
           {/* 右側の追加ボタン */}
-          <Button startIcon={<AddCircleIcon />} color="primary">
+          <Button
+            onClick={handleAddTransactionForm}
+            startIcon={<AddCircleIcon />}
+            color="primary"
+          >
             内訳を追加
           </Button>
         </Box>

@@ -15,13 +15,23 @@ interface Homeprops {
 const Home = ({ monthlyTransactions, setCurrentMonth }: Homeprops) => {
   const today = format(new Date(), "yyyy-MM-dd");
   const [currentDay, setCurrentDay] = useState(today);
-  //console.log(currentDay);
+  const [isEntryDrawerOpen, setIsEntryDrawerOpen] = useState(false);
 
   //1日分のデータを取得
   const dailyTrabsactions = monthlyTransactions.filter((transaction) => {
     return transaction.date === currentDay;
   });
   //console.log(dailyTrabsactions);
+
+  //フォームを閉じる処理
+  const onCloseForm = () => {
+    setIsEntryDrawerOpen(!isEntryDrawerOpen);
+  };
+
+  //フォームの開閉処理
+  const handleAddTransactionForm = () => {
+    setIsEntryDrawerOpen(!isEntryDrawerOpen);
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -32,6 +42,8 @@ const Home = ({ monthlyTransactions, setCurrentMonth }: Homeprops) => {
           monthlyTransactions={monthlyTransactions}
           setCurrentMonth={setCurrentMonth}
           setCurrentDay={setCurrentDay}
+          currentDay={currentDay}
+          today={today}
         />
       </Box>
 
@@ -40,8 +52,13 @@ const Home = ({ monthlyTransactions, setCurrentMonth }: Homeprops) => {
         <TransactionMenu
           dailyTrabsactions={dailyTrabsactions}
           currentDay={currentDay}
+          handleAddTransactionForm={handleAddTransactionForm}
         />
-        <TransactionForm />
+        <TransactionForm
+          onCloseForm={onCloseForm}
+          isEntryDrawerOpen={isEntryDrawerOpen}
+          currentDay={currentDay}
+        />
       </Box>
     </Box>
   );
