@@ -22,7 +22,7 @@ import AddBusinessIcon from "@mui/icons-material/AddBusiness"; //ビジネスア
 import SavingsIcon from "@mui/icons-material/Savings"; //貯金アイコン
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { IncomeCategory, OutgoCategory } from "../types";
+import { IncomeCategory, OutgoCategory, Transaction } from "../types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Schema, transactionSchema } from "../validations/schema";
 
@@ -30,6 +30,16 @@ interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
+  onSaveTransaction: (transaction: Schema) => Promise<void>;
+  selectedTransaction: Transaction | null;
+  onDeleteTransaction: (id: string) => Promise<void>;
+  setSelectedTransaction: React.Dispatch<
+    React.SetStateAction<Transaction | null>
+  >;
+  onUpdateTransaction: (
+    transaction: Schema,
+    transactionId: string
+  ) => Promise<void>;
 }
 
 type ValueType = "income" | "outgo";
@@ -43,6 +53,11 @@ const TransactionForm = ({
   onCloseForm,
   isEntryDrawerOpen,
   currentDay,
+  onSaveTransaction,
+  selectedTransaction,
+  onDeleteTransaction,
+  setSelectedTransaction,
+  onUpdateTransaction,
 }: TransactionFormProps) => {
   const formWidth = 320;
 
@@ -69,6 +84,7 @@ const TransactionForm = ({
     watch,
     formState: { errors },
     handleSubmit,
+    reset,
   } = useForm<Schema>({
     defaultValues: {
       type: "outgo",
@@ -84,6 +100,7 @@ const TransactionForm = ({
   //収入・支出の切り替え
   const toggleValue = (type: ValueType) => {
     setValue("type", type);
+    setValue("category", "");
   };
 
   //現在のフォームのタイプを監視
@@ -101,8 +118,73 @@ const TransactionForm = ({
     setValue("date", currentDay);
   }, [currentDay]);
 
+  //保存ボタンが押された時の処理
   const onSubmit: SubmitHandler<Schema> = (data) => {
     console.log(data);
+
+    if (selectedTransaction) {
+      onUpdateTransaction(data, selectedTransaction.id)
+        .then(() => {
+          console.log("更新");
+          setSelectedTransaction(null);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      onSaveTransaction(data)
+        .then(() => {
+          console.log("保存");
+          setSelectedTransaction(null);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+
+    reset({
+      type: "outgo",
+      date: currentDay,
+      amount: 0,
+      category: "",
+      content: "",
+    }); //日付以外をリセット
+  };
+
+  useEffect(() => {
+    //選択肢が更新されたかどうかを確認
+    if (selectedTransaction) {
+      const categoryExists = categories.some(
+        (category) => category.label === selectedTransaction?.category
+      );
+      console.log(categories);
+      console.log(categoryExists);
+      setValue("category", categoryExists ? selectedTransaction.category : "");
+    }
+  }, [selectedTransaction, categories]);
+
+  useEffect(() => {
+    if (selectedTransaction) {
+      setValue("type", selectedTransaction.type);
+      setValue("date", selectedTransaction.date);
+      setValue("amount", selectedTransaction.amount);
+      setValue("content", selectedTransaction.content);
+    } else {
+      reset({
+        type: "outgo",
+        date: currentDay,
+        amount: 0,
+        category: "",
+        content: "",
+      });
+    }
+  }, [selectedTransaction]);
+
+  const handleDelete = () => {
+    if (selectedTransaction) {
+      onDeleteTransaction(selectedTransaction.id);
+      setSelectedTransaction(null);
+    }
   };
 
   return (
@@ -253,8 +335,21 @@ const TransactionForm = ({
             color={currentType === "income" ? "primary" : "error"}
             fullWidth
           >
-            保存
+            {selectedTransaction ? "更新" : "保存"}
           </Button>
+
+          {/* 削除ボタン */}
+          {selectedTransaction && (
+            <Button
+              type="submit"
+              variant="outlined"
+              color={"secondary"}
+              fullWidth
+              onClick={handleDelete}
+            >
+              削除
+            </Button>
+          )}
         </Stack>
       </Box>
     </Box>
